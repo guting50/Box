@@ -4,35 +4,23 @@ import android.text.TextUtils;
 import android.util.Base64;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.server.ControlManager;
-import com.github.tvbox.osc.util.StringUtils;
-import com.github.tvbox.osc.util.urlhttp.OkHttpUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.HttpHeaders;
 import com.orhanobut.hawk.Hawk;
+import okhttp3.Response;
 import org.json.JSONObject;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.math.BigDecimal;
+
+import java.io.*;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import okhttp3.Response;
 
 public class FileUtils {
 
     public static File open(String str) {
-        return new File(App.getInstance().getExternalCacheDir().getAbsolutePath() + "/qjscache_" + str + ".js");
+        return new File(getExternalCachePath() + "/qjscache_" + str + ".js");
     }
 
     public static boolean writeSimple(byte[] data, File dst) {
@@ -62,7 +50,7 @@ public class FileUtils {
         }
         return null;
     }
-    
+
     public static String readFileToString(String path, String charsetName) {
         // 定义返回结果
         StringBuilder jsonString = new StringBuilder();
@@ -121,11 +109,11 @@ public class FileUtils {
     }
 
     public static String loadModule(String name) {
-        try {        	
+        try {
             if (name.contains("gbk.js")) {
                 name = "gbk.js";
             } else if (name.contains("模板.js")) {
-                name = "模板.js";            
+                name = "模板.js";
             } else if (name.contains("cat.js")) {
                 name = "cat.js";
             }
@@ -150,11 +138,11 @@ public class FileUtils {
                 return getAsOpen("js/lib/" + name);
             } else if (name.startsWith("file://")) {
                 return get(ControlManager.get()
-                    .getAddress(true) + "file/" + name.replace("file:///", "")
-                    .replace("file://", ""));
+                        .getAddress(true) + "file/" + name.replace("file:///", "")
+                        .replace("file://", ""));
             } else if (name.startsWith("clan://localhost/")) {
                 return get(ControlManager.get()
-                    .getAddress(true) + "file/" + name.replace("clan://localhost/", ""));
+                        .getAddress(true) + "file/" + name.replace("clan://localhost/", ""));
             } else if (name.startsWith("clan://")) {
                 String substring = name.substring(7);
                 int indexOf = substring.indexOf(47);
@@ -212,7 +200,7 @@ public class FileUtils {
             return "";
         }
     }
-    
+
     public static byte[] getCacheByte(String name) {
         try {
             File file = open("B_" + name);
@@ -235,27 +223,27 @@ public class FileUtils {
             e.printStackTrace();
         }
     }
-    
+
     public static void setCacheByte(String name, byte[] data) {
         try {
-            writeSimple(byteMerger("//DRPY".getBytes(),Base64.encode(data, Base64.URL_SAFE)), open("B_" + name));
+            writeSimple(byteMerger("//DRPY".getBytes(), Base64.encode(data, Base64.URL_SAFE)), open("B_" + name));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    public static byte[] byteMerger(byte[] bt1, byte[] bt2){
-        byte[] bt3 = new byte[bt1.length+bt2.length];
+
+    public static byte[] byteMerger(byte[] bt1, byte[] bt2) {
+        byte[] bt3 = new byte[bt1.length + bt2.length];
         System.arraycopy(bt1, 0, bt3, 0, bt1.length);
         System.arraycopy(bt2, 0, bt3, bt1.length, bt2.length);
         return bt3;
     }
-    
+
     public static String get(String str) {
         return get(str, null);
     }
 
-    public static String get(String str, Map<String, String> headerMap) {    
+    public static String get(String str, Map<String, String> headerMap) {
         try {
             HttpHeaders h = new HttpHeaders();
             Response response = null;
@@ -265,9 +253,9 @@ public class FileUtils {
                 }
                 response = OkGo.<String>get(str).headers(h).execute();
             } else {
-                response =OkGo.<String>get(str).headers("User-Agent", str.startsWith("https://gitcode.net/") ? UA.random() : "okhttp/3.15").execute();
+                response = OkGo.<String>get(str).headers("User-Agent", str.startsWith("https://gitcode.net/") ? UA.random() : "okhttp/3.15").execute();
             }
-            if (response.isSuccessful() && response.body() != null){
+            if (response.isSuccessful() && response.body() != null) {
                 return new String(response.body().bytes(), "UTF-8");
             } else {
                 return "";
@@ -276,23 +264,30 @@ public class FileUtils {
             return "";
         }
     }
-    
+
     private static final Pattern URLJOIN = Pattern.compile("^http.*\\.(js|txt|json|m3u)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
 
     public static File getCacheDir() {
         return App.getInstance().getCacheDir();
     }
+
     public static File getExternalCacheDir() {
         return App.getInstance().getExternalCacheDir();
     }
+
     public static String getExternalCachePath() {
-        return getExternalCacheDir().getAbsolutePath();
+        //部分机器getExternalCacheDir()会返回空
+        File externalCacheDir = getExternalCacheDir();
+        if (externalCacheDir == null) {
+            return getCachePath();
+        }
+        return externalCacheDir.getAbsolutePath();
     }
 
     public static String getCachePath() {
         return getCacheDir().getAbsolutePath();
     }
-    
+
     public static void cleanPlayerCache() {
         recursiveDelete(new File(getCachePath() + File.separator + "thunder"));
         recursiveDelete(new File(getExternalCachePath() + File.separator + "ijkcaches"));
@@ -328,7 +323,7 @@ public class FileUtils {
         int p = fileName.lastIndexOf('.');
         if (p != -1) {
             return fileName.substring(p)
-                .toLowerCase();
+                    .toLowerCase();
         }
         return "";
     }
