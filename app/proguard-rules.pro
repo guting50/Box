@@ -18,6 +18,25 @@
 -keepattributes LineNumberTable
 -renamesourcefileattribute SourceFile
 
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** e(...);
+    public static *** i(...);
+    public static *** v(...);
+    public static *** println(...);
+    public static *** w(...);
+    public static *** wtf(...);
+}
+-assumenosideeffects class java.io.PrintStream {
+    public *** println(...);
+    public *** print(...);
+}
+
+-keepattributes Signature
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-keepattributes AnnotationDefault,RuntimeVisibleAnnotations
+
 # 重新包装所有重命名的包并放在给定的单一包中
 -flattenpackagehierarchy androidx.base
 
