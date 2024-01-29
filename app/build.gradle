@@ -150,4 +150,7 @@ dependencies {
             exclude group: 'xpp3', module: 'xpp3'
         }
     }
+
+    //执行adb命令的工具
+    implementation 'com.jaredrummler:android-shell:1.0.0'
 }

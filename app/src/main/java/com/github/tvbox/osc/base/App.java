@@ -9,6 +9,7 @@ import com.github.tvbox.osc.callback.LoadingCallback;
 import com.github.tvbox.osc.data.AppDataManager;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.util.*;
+import com.jaredrummler.android.shell.Shell;
 import com.kingja.loadsir.core.LoadSir;
 import com.orhanobut.hawk.Hawk;
 import com.p2p.P2PClass;
@@ -82,6 +83,12 @@ public class App extends MultiDexApplication {
                                     .build()))
                     .build();
         }
+
+        if (Hawk.get(HawkConfig.DEBUG_OPEN, false)) {
+            LogUtils.init(this);
+            CrashHandler.getInstance().init();
+            Shell.SH.run(" pull /data/anr/traces.txt sdcard");
+        }
     }
 
     public static P2PClass getp2p() {
@@ -100,7 +107,7 @@ public class App extends MultiDexApplication {
     private void initParams() {
         // Hawk
         Hawk.init(this).build();
-        Hawk.put(HawkConfig.DEBUG_OPEN, false);
+//        Hawk.put(HawkConfig.DEBUG_OPEN, false);
 
         // 首页选项
         putDefault(HawkConfig.HOME_SHOW_SOURCE, true);       //数据源显示: true=开启, false=关闭
