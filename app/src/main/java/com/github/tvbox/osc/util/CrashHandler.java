@@ -56,6 +56,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         printWriter.close();
 
         if (!TextUtils.isEmpty(stacktraceAsString)) {
+            LogUtils.writeFile(stacktraceAsString);
             Log.e("MyExceptionHandler", stacktraceAsString);
             ToastUtils.showLong("很抱歉，程序出现异常，请联系管理员!\n" + stacktraceAsString);
             return;
