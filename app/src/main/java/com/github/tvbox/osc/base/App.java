@@ -10,6 +10,14 @@ import com.github.tvbox.osc.data.AppDataManager;
 import com.github.tvbox.osc.server.ControlManager;
 import com.github.tvbox.osc.util.*;
 import com.jaredrummler.android.shell.Shell;
+import com.github.tvbox.osc.util.EpgUtil;
+import com.github.tvbox.osc.util.FileUtils;
+import com.github.tvbox.osc.util.HawkConfig;
+import com.github.tvbox.osc.util.LocaleHelper;
+import com.github.tvbox.osc.util.LOG;
+import com.github.tvbox.osc.util.OkGoHelper;
+import com.github.tvbox.osc.util.PlayerHelper;
+import com.hjq.permissions.XXPermissions;
 import com.kingja.loadsir.core.LoadSir;
 import com.orhanobut.hawk.Hawk;
 import com.p2p.P2PClass;
@@ -44,6 +52,8 @@ public class App extends MultiDexApplication {
         initLocale();
         // OKGo
         OkGoHelper.init();
+        // 闭关检查模式
+        XXPermissions.setCheckMode(false);
         // Get EPG Info
         EpgUtil.init();
         // 初始化Web服务器
