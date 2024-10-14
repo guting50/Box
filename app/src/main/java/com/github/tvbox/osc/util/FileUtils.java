@@ -1,7 +1,10 @@
 package com.github.tvbox.osc.util;
 
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Base64;
+
+import com.github.catvod.utils.Path;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.server.ControlManager;
 import com.google.gson.Gson;
@@ -13,6 +16,18 @@ import okhttp3.Response;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -138,11 +153,11 @@ public class FileUtils {
                 return getAsOpen("js/lib/" + name);
             } else if (name.startsWith("file://")) {
                 return get(ControlManager.get()
-                        .getAddress(true) + "file/" + name.replace("file:///", "")
-                        .replace("file://", ""));
+                    .getAddress(true) + "file/" + name.replace("file:///", "")
+                    .replace("file://", ""));
             } else if (name.startsWith("clan://localhost/")) {
                 return get(ControlManager.get()
-                        .getAddress(true) + "file/" + name.replace("clan://localhost/", ""));
+                    .getAddress(true) + "file/" + name.replace("clan://localhost/", ""));
             } else if (name.startsWith("clan://")) {
                 String substring = name.substring(7);
                 int indexOf = substring.indexOf(47);
@@ -226,14 +241,14 @@ public class FileUtils {
 
     public static void setCacheByte(String name, byte[] data) {
         try {
-            writeSimple(byteMerger("//DRPY".getBytes(), Base64.encode(data, Base64.URL_SAFE)), open("B_" + name));
+            writeSimple(byteMerger("//DRPY".getBytes(),Base64.encode(data, Base64.URL_SAFE)), open("B_" + name));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static byte[] byteMerger(byte[] bt1, byte[] bt2) {
-        byte[] bt3 = new byte[bt1.length + bt2.length];
+    public static byte[] byteMerger(byte[] bt1, byte[] bt2){
+        byte[] bt3 = new byte[bt1.length+bt2.length];
         System.arraycopy(bt1, 0, bt3, 0, bt1.length);
         System.arraycopy(bt2, 0, bt3, bt1.length, bt2.length);
         return bt3;
@@ -253,9 +268,9 @@ public class FileUtils {
                 }
                 response = OkGo.<String>get(str).headers(h).execute();
             } else {
-                response = OkGo.<String>get(str).headers("User-Agent", str.startsWith("https://gitcode.net/") ? UA.random() : "okhttp/3.15").execute();
+                response =OkGo.<String>get(str).headers("User-Agent", str.startsWith("https://gitcode.net/") ? UA.random() : "okhttp/3.15").execute();
             }
-            if (response.isSuccessful() && response.body() != null) {
+            if (response.isSuccessful() && response.body() != null){
                 return new String(response.body().bytes(), "UTF-8");
             } else {
                 return "";
@@ -270,15 +285,13 @@ public class FileUtils {
     public static File getCacheDir() {
         return App.getInstance().getCacheDir();
     }
-
     public static File getExternalCacheDir() {
         return App.getInstance().getExternalCacheDir();
     }
-
     public static String getExternalCachePath() {
         //部分机器getExternalCacheDir()会返回空
         File externalCacheDir = getExternalCacheDir();
-        if (externalCacheDir == null) {
+        if (externalCacheDir == null){
             return getCachePath();
         }
         return externalCacheDir.getAbsolutePath();
@@ -333,5 +346,30 @@ public class FileUtils {
         int lastSlashIndex = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
         // 如果路径中有点号，并且点号在最后一个斜杠之后，认为有后缀
         return lastDotIndex > lastSlashIndex && lastDotIndex < path.length() - 1;
+    }
+
+    public static String read(String path) {
+        try {
+            return read(new FileInputStream(getLocal(path)));
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public static String read(InputStream is) {
+        try {
+            byte[] data = new byte[is.available()];
+            is.read(data);
+            is.close();
+            return new String(data, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    public static File getLocal(String path) {
+        File file1 = new File(path.replace("file:/", ""));
+        File file2 = new File(path.replace("file:/", Environment.getExternalStorageDirectory().getAbsolutePath()));
+        return file2.exists() ? file2 : file1.exists() ? file1 : new File(path);
     }
 }
