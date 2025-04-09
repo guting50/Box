@@ -445,7 +445,6 @@ public class HomeActivity extends BaseActivity {
         mGridView.requestFocus();
 
         if (dataInitOk && jarInitOk) {
-            showLoading();
             sourceViewModel.getSort(ApiConfig.get().getHomeSourceBean().getKey());
             if (hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 LOG.e("有");
@@ -484,6 +483,7 @@ public class HomeActivity extends BaseActivity {
                     @Override
                     public void error(String msg) {
                         jarInitOk = true;
+                        dataInitOk = true;
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
